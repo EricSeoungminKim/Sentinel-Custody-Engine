@@ -58,62 +58,71 @@
   main { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); min-height: calc(100vh - 53px); }
   .db-col { background: var(--bg); display: flex; flex-direction: column; }
 
+  /* Bold left-border accent per DB */
+  .db-col.col-dev    { border-left: 3px solid var(--blue); }
+  .db-col.col-test   { border-left: 3px solid var(--yellow); }
+  .db-col.col-record { border-left: 3px solid var(--green); }
+
   .db-header {
-    padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between; position: sticky; top: 53px; z-index: 10;
+    padding: 14px 16px; background: var(--surface); border-bottom: 2px solid var(--border);
+    position: sticky; top: 53px; z-index: 10;
   }
-  .db-name { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+  .db-header-top { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+  .db-name { font-family: var(--mono); font-size: 15px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
   .db-name.dev    { color: var(--blue); }
   .db-name.test   { color: var(--yellow); }
   .db-name.record { color: var(--green); }
-  .db-port { font-family: var(--mono); font-size: 10px; color: var(--dim); }
-  .db-count { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+  .db-port { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+  .db-header-meta { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: .05em; }
 
-  /* ── Section within column ── */
+  /* ── Section ── */
   .col-section { border-bottom: 1px solid var(--border); }
   .col-section-title {
     font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--dim); padding: 8px 16px;
+    text-transform: uppercase; color: var(--dim); padding: 7px 16px;
     background: #0f1218; border-bottom: 1px solid var(--border);
     display: flex; justify-content: space-between;
   }
 
   /* ── Transaction cards ── */
   .tx-card {
-    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
     transition: background .1s;
   }
-  .tx-card:hover { background: rgba(255,255,255,.02); }
+  .tx-card:hover { background: rgba(255,255,255,.025); }
   .tx-card:last-child { border-bottom: none; }
 
-  .tx-row1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-  .tx-amount { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--amber); }
-  .tx-addr { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-bottom: 4px; }
-  .tx-row2 { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
-  .tx-time { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-top: 2px; }
-  .tx-hash-line { font-family: var(--mono); font-size: 10px; margin-top: 2px; }
-  .tx-hash-link { color: var(--blue); text-decoration: none; }
+  .tx-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .tx-amount { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--amber); line-height: 1.2; }
+  .tx-amount-sub { font-family: var(--mono); font-size: 9px; color: var(--dim); letter-spacing: .04em; }
+  .tx-badges { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+  .tx-addr { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-bottom: 6px; }
+  .tx-ledger { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-bottom: 4px; }
+  .tx-footer { display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px; }
+  .tx-time { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+  .tx-hash-link { font-family: var(--mono); font-size: 10px; color: var(--blue); text-decoration: none; }
   .tx-hash-link:hover { text-decoration: underline; }
 
-  /* ── Audit log entries ── */
+  /* ── Audit log ── */
   .audit-entry {
-    padding: 8px 16px; border-bottom: 1px solid var(--border);
-    display: grid; grid-template-columns: auto 1fr; gap: 0 10px;
+    padding: 10px 16px 10px 14px; border-bottom: 1px solid var(--border);
+    display: grid; grid-template-columns: 10px 1fr; gap: 0 10px; align-items: start;
   }
   .audit-entry:last-child { border-bottom: none; }
-  .audit-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
-  .audit-body { }
-  .audit-row1 { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; }
+  .audit-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 3px; }
+  .audit-row1 { display: flex; gap: 8px; align-items: baseline; margin-bottom: 3px; }
   .audit-event { font-family: var(--mono); font-size: 11px; font-weight: 600; }
-  .audit-status { font-family: var(--mono); font-size: 10px; color: var(--dim); }
-  .audit-msg { font-size: 11px; color: var(--text); margin-bottom: 2px; }
-  .audit-time { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+  .audit-status-lbl { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+  .audit-msg { font-size: 11px; color: var(--text); margin-bottom: 3px; line-height: 1.4; }
+  .audit-meta { display: flex; justify-content: space-between; }
   .audit-txid { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+  .audit-time { font-family: var(--mono); font-size: 10px; color: var(--dim); }
 
   /* ── Badges ── */
   .badge {
     display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: .08em;
-    padding: 1px 6px; border-radius: 2px; text-transform: uppercase; border: 1px solid transparent;
+    padding: 2px 6px; border-radius: 2px; text-transform: uppercase; border: 1px solid transparent;
+    white-space: nowrap;
   }
   .badge-PENDING        { color: var(--yellow); border-color: rgba(232,200,74,.3);  background: rgba(232,200,74,.08); }
   .badge-SIGNED         { color: var(--blue);   border-color: rgba(74,158,245,.3);  background: rgba(74,158,245,.08); }
@@ -134,7 +143,19 @@
   .dot-REJECTED  { background: var(--red); }
   .dot-default   { background: var(--dim); }
 
-  .empty { padding: 20px 16px; font-family: var(--mono); font-size: 11px; color: var(--dim); text-align: center; }
+  /* audit event text colors */
+  .evt-SIGNED    { color: var(--blue); }
+  .evt-BROADCAST { color: var(--amber); }
+  .evt-SETTLED   { color: var(--green); }
+  .evt-FAILED    { color: var(--red); }
+  .evt-APPROVED  { color: var(--green); }
+  .evt-REJECTED  { color: var(--red); }
+
+  .empty {
+    padding: 24px 16px; font-family: var(--mono); font-size: 11px;
+    color: var(--dim); text-align: center; letter-spacing: .06em;
+  }
+  .empty-sub { font-size: 10px; margin-top: 4px; opacity: .6; }
   .error { padding: 12px 16px; font-family: var(--mono); font-size: 11px; color: var(--red); }
 </style>
 </head>
@@ -159,16 +180,16 @@
 </header>
 
 <main id="grid">
-  <div class="db-col" id="col-dev"></div>
-  <div class="db-col" id="col-test"></div>
-  <div class="db-col" id="col-record"></div>
+  <div class="db-col col-dev"    id="col-dev"></div>
+  <div class="db-col col-test"   id="col-test"></div>
+  <div class="db-col col-record" id="col-record"></div>
 </main>
 
 <script>
 const DB_META = {
-  dev:    { label: 'DEV',    port: '5433', cls: 'dev' },
-  test:   { label: 'TEST',   port: '5434', cls: 'test' },
-  record: { label: 'RECORD', port: '5435', cls: 'record' },
+  dev:    { label: 'DEV',    port: '5433', cls: 'dev',    desc: 'local development' },
+  test:   { label: 'TEST',   port: '5434', cls: 'test',   desc: 'automated test suite' },
+  record: { label: 'RECORD', port: '5435', cls: 'record', desc: 'persistent demo records' },
 };
 
 function apiKey() { return document.getElementById('api-key').value.trim(); }
@@ -194,16 +215,42 @@ function shortHash(h) {
   return h.slice(0, 10) + '…' + h.slice(-6);
 }
 
+function shortId(id) {
+  if (!id) return '';
+  return id.slice(0, 8) + '…';
+}
+
+// Format amount: show full precision for tiny values, 6dp otherwise
+function fmtAmount(raw) {
+  const n = parseFloat(raw);
+  if (n === 0) return { main: '0', sub: 'ETH' };
+  if (n < 0.000001) return { main: '< 0.000001', sub: 'ETH (1 wei)' };
+  if (n < 1) return { main: n.toFixed(9).replace(/0+$/, ''), sub: 'ETH' };
+  // Strip trailing zeros for round numbers
+  const s = n.toFixed(6);
+  const trimmed = s.replace(/\.?0+$/, '');
+  return { main: trimmed, sub: 'ETH' };
+}
+
+// Determine timezone suffix from timestamp (rough: PDT Apr-Oct, PST Nov-Mar)
+function tzSuffix(dtStr) {
+  if (!dtStr) return '';
+  const month = parseInt(dtStr.slice(5, 7));
+  return (month >= 3 && month <= 10) ? 'PDT' : 'PST';
+}
+
 function renderCol(dbData) {
   const meta = DB_META[dbData.db];
-  const colId = `col-${dbData.db}`;
-  const col = document.getElementById(colId);
+  const col = document.getElementById(`col-${dbData.db}`);
 
   if (!dbData.ok) {
     col.innerHTML = `
       <div class="db-header">
-        <span class="db-name ${meta.cls}">${meta.label}</span>
-        <span class="db-port">:${meta.port}</span>
+        <div class="db-header-top">
+          <span class="db-name ${meta.cls}">${meta.label}</span>
+          <span class="db-port">:${meta.port}</span>
+        </div>
+        <div class="db-header-meta">${meta.desc}</div>
       </div>
       <div class="error">⚠ ${dbData.error}</div>`;
     return;
@@ -212,54 +259,67 @@ function renderCol(dbData) {
   const txCount = dbData.transactions.length;
   const auditCount = dbData.audit_logs.length;
 
-  // Transactions HTML
+  // ── Transactions ──
   const txHtml = txCount === 0
-    ? '<div class="empty">NO TRANSACTIONS</div>'
+    ? `<div class="empty">CLEAN<div class="empty-sub">0 transactions</div></div>`
     : dbData.transactions.map(tx => {
+        const amt = fmtAmount(tx.amount);
+        const tz  = tzSuffix(tx.created_at);
         const hashLine = tx.tx_hash
-          ? `<div class="tx-hash-line"><a class="tx-hash-link" href="https://sepolia.etherscan.io/tx/${tx.tx_hash}" target="_blank">${shortHash(tx.tx_hash)}</a></div>`
-          : '';
+          ? `<a class="tx-hash-link" href="https://sepolia.etherscan.io/tx/${tx.tx_hash}" target="_blank">${shortHash(tx.tx_hash)} ↗</a>`
+          : '<span style="color:var(--dim);font-family:var(--mono);font-size:10px">no hash</span>';
         return `
         <div class="tx-card">
-          <div class="tx-row1">
-            <span class="tx-amount">${parseFloat(tx.amount).toFixed(6)} ETH</span>
-            ${badge(tx.status)}
+          <div class="tx-top">
+            <div>
+              <div class="tx-amount">${amt.main}</div>
+              <div class="tx-amount-sub">${amt.sub}</div>
+            </div>
+            <div class="tx-badges">
+              ${badge(tx.status)}
+              ${badge(tx.policy_decision)}
+            </div>
           </div>
           <div class="tx-addr" title="${tx.to_address}">→ ${shortAddr(tx.to_address)}</div>
-          <div class="tx-row2">
-            ${badge(tx.policy_decision)}
+          <div class="tx-ledger">ledger ${shortId(tx.ledger_id)}</div>
+          <div class="tx-footer">
+            <span class="tx-time">${tx.created_at ?? '—'} ${tz}</span>
+            ${hashLine}
           </div>
-          ${hashLine}
-          <div class="tx-time">${tx.created_at ?? '—'} LA</div>
         </div>`;
       }).join('');
 
-  // Audit logs HTML
+  // ── Audit logs ──
   const auditHtml = auditCount === 0
-    ? '<div class="empty">NO AUDIT LOGS</div>'
+    ? `<div class="empty">CLEAN<div class="empty-sub">0 audit events</div></div>`
     : dbData.audit_logs.map(a => {
-        const dotCls = `dot-${a.event_type}`;
-        const shortTxId = a.transaction_id ? a.transaction_id.slice(0, 8) + '…' : '';
+        const dotCls  = `dot-${a.event_type}` in document.styleSheets ? `dot-${a.event_type}` : 'dot-default';
+        const evtCls  = `evt-${a.event_type}`;
+        const tz      = tzSuffix(a.created_at);
         return `
         <div class="audit-entry">
-          <div class="audit-dot ${dotCls}" style="margin-top:5px"></div>
-          <div class="audit-body">
+          <div class="audit-dot dot-${a.event_type}"></div>
+          <div>
             <div class="audit-row1">
-              <span class="audit-event">${a.event_type}</span>
-              <span class="audit-status">${a.status ?? ''}</span>
+              <span class="audit-event ${evtCls}">${a.event_type}</span>
+              <span class="audit-status-lbl">${a.status ?? ''}</span>
             </div>
             <div class="audit-msg">${a.message ?? ''}</div>
-            <div class="audit-txid">${shortTxId}</div>
-            <div class="audit-time">${a.created_at ?? '—'} LA</div>
+            <div class="audit-meta">
+              <span class="audit-txid" title="${a.transaction_id ?? ''}">${shortId(a.transaction_id)}</span>
+              <span class="audit-time">${a.created_at ?? '—'} ${tz}</span>
+            </div>
           </div>
         </div>`;
       }).join('');
 
   col.innerHTML = `
     <div class="db-header">
-      <span class="db-name ${meta.cls}">${meta.label}</span>
-      <span class="db-port">:${meta.port}</span>
-      <span class="db-count">${txCount} tx · ${auditCount} logs</span>
+      <div class="db-header-top">
+        <span class="db-name ${meta.cls}">${meta.label}</span>
+        <span class="db-port">:${meta.port}</span>
+      </div>
+      <div class="db-header-meta">${meta.desc} · ${txCount} tx · ${auditCount} logs</div>
     </div>
     <div class="col-section">
       <div class="col-section-title"><span>TRANSACTIONS</span><span>${txCount} rows</span></div>
