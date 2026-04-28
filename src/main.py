@@ -2,7 +2,6 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 from src.config import get_settings
 from src.gatekeeper.admin_router import router as admin_router
 from src.gatekeeper.router import router as gatekeeper_router
