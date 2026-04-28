@@ -38,7 +38,7 @@
     color: var(--dim); text-decoration: none; padding: 6px 14px; border: 1px solid var(--border);
     transition: color .15s, border-color .15s;
   }
-  nav a:first-child { border-right: none; }
+  nav a:not(:last-child) { border-right: none; }
   nav a.active { color: var(--amber); border-color: var(--amber); }
   nav a:hover:not(.active) { color: var(--text); }
   .hdr-right { display: flex; align-items: center; gap: 16px; }
@@ -166,6 +166,7 @@
   <nav>
     <a href="/dashboard">DASHBOARD</a>
     <a href="/multidb" class="active">MULTI-DB</a>
+    <a href="/audit">AUDIT</a>
   </nav>
   <div class="hdr-right">
     <div class="live-pill">

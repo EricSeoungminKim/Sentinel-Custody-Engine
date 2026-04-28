@@ -403,7 +403,8 @@
       <div class="logo">SENTINEL<span>/CUSTODY</span></div>
       <nav style="display:flex;gap:0">
         <a href="/dashboard" style="font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);text-decoration:none;padding:6px 14px;border:1px solid var(--amber);border-right:none">DASHBOARD</a>
-        <a href="/multidb"   style="font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;padding:6px 14px;border:1px solid var(--border)">MULTI-DB</a>
+        <a href="/multidb"   style="font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-right:none">MULTI-DB</a>
+        <a href="/audit"     style="font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;padding:6px 14px;border:1px solid var(--border)">AUDIT</a>
       </nav>
       <div class="header-right">
         <div class="live-pill">
@@ -581,6 +582,13 @@
         return `<a class="tx-link" href="https://sepolia.etherscan.io/tx/${hash}" target="_blank">${short}</a>`;
       }
 
+      function fmtAmount(val) {
+        const n = parseFloat(val);
+        if (isNaN(n)) return val;
+        if (n > 0 && n < 0.000001) return "< 0.000001";
+        return n.toFixed(6).replace(/\.?0+$/, "") || "0";
+      }
+
       function fmtTime(iso) {
         if (!iso) return "—";
         const d = new Date(iso);
@@ -611,7 +619,7 @@
               return `<tr>
         <td>${shortId(tx.transaction_id)}</td>
         <td>${shortAddr(tx.to_address)}</td>
-        <td class="amount-cell">${parseFloat(tx.amount).toFixed(6)}</td>
+        <td class="amount-cell">${fmtAmount(tx.amount)}</td>
         <td>${badge(tx.status)}</td>
         <td>${badge(tx.policy_decision)}</td>
         <td>${txHashCell(tx.tx_hash)}</td>

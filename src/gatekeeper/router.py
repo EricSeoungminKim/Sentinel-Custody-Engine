@@ -103,6 +103,47 @@ def _tx_response(tx: Transaction) -> TransactionStatusResponse:
     )
 
 
+@router.get("/audit-all")
+async def get_all_audit_logs(
+    session: AsyncSession = Depends(get_session),
+) -> list[dict]:
+    txs = (
+        await session.execute(
+            select(Transaction).order_by(Transaction.created_at.desc())
+        )
+    ).scalars().all()
+
+    logs = (
+        await session.execute(
+            select(TransactionAuditLog).order_by(TransactionAuditLog.created_at.desc())
+        )
+    ).scalars().all()
+
+    logs_by_tx: dict[uuid.UUID, list] = {}
+    for log in logs:
+        logs_by_tx.setdefault(log.transaction_id, []).append({
+            "event_type": log.event_type,
+            "status": log.status,
+            "tx_hash": log.tx_hash,
+            "message": log.message,
+            "created_at": log.created_at.isoformat() if log.created_at else None,
+        })
+
+    return [
+        {
+            "transaction_id": str(tx.id),
+            "to_address": tx.to_address,
+            "amount": str(tx.amount),
+            "status": tx.status.value,
+            "policy_decision": tx.policy_decision.value if tx.policy_decision else None,
+            "tx_hash": tx.tx_hash,
+            "created_at": tx.created_at.isoformat() if tx.created_at else None,
+            "audit_logs": logs_by_tx.get(tx.id, []),
+        }
+        for tx in txs
+    ]
+
+
 @router.post("/process-next", response_model=ProcessTransactionResponse)
 async def process_next_withdrawal(
     session: AsyncSession = Depends(get_session),

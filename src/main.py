@@ -12,7 +12,7 @@ _ROOT = Path(__file__).resolve().parent.parent
 
 async def _api_key_middleware(request: Request, call_next):
     # Dashboard and its static assets served without auth
-    if request.url.path in ("/dashboard", "/dashboard.html", "/multidb"):
+    if request.url.path in ("/dashboard", "/dashboard.html", "/multidb", "/audit"):
         return await call_next(request)
     api_key = request.headers.get("X-API-Key")
     if api_key != get_settings().sentinel_api_key:
@@ -34,6 +34,10 @@ def create_app() -> FastAPI:
     @app.get("/multidb", include_in_schema=False)
     async def multidb_page():
         return FileResponse(_ROOT / "multidb.html")
+
+    @app.get("/audit", include_in_schema=False)
+    async def audit_page():
+        return FileResponse(_ROOT / "audit.html")
 
     return app
 

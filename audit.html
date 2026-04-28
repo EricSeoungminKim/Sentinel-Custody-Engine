@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sentinel — Audit Log</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #0d0f12;
+        --surface: #13161b;
+        --border: #1f242d;
+        --muted: #3a4150;
+        --text: #c8d0dc;
+        --text-dim: #6b7585;
+        --amber: #f0a500;
+        --green: #29d97a;
+        --red: #e05252;
+        --blue: #4a9ef5;
+        --yellow: #e8c84a;
+        --purple: #c084fc;
+        --mono: "IBM Plex Mono", monospace;
+        --sans: "IBM Plex Sans", sans-serif;
+      }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 13px; line-height: 1.5; min-height: 100vh; }
+
+      /* ── Header ── */
+      header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 28px; border-bottom: 1px solid var(--border);
+        background: var(--surface); position: sticky; top: 0; z-index: 100;
+      }
+      .logo { font-family: var(--mono); font-weight: 600; font-size: 14px; letter-spacing: .08em; color: var(--amber); }
+      .logo span { color: var(--text-dim); font-weight: 400; }
+      .header-right { display: flex; align-items: center; gap: 20px; }
+      .live-pill { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: var(--green); letter-spacing: .06em; }
+      .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+      @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+      .api-config { display: flex; gap: 8px; align-items: center; }
+      .api-config label { font-family: var(--mono); font-size: 11px; color: var(--text-dim); letter-spacing: .05em; }
+      .api-config input {
+        background: var(--bg); border: 1px solid var(--border); color: var(--text);
+        font-family: var(--mono); font-size: 11px; padding: 4px 8px; border-radius: 3px;
+        width: 180px; outline: none; transition: border-color .15s;
+      }
+      .api-config input:focus { border-color: var(--amber); }
+
+      /* ── Nav ── */
+      nav { display: flex; gap: 0; }
+      nav a {
+        font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+        text-decoration: none; padding: 6px 14px; border: 1px solid var(--border);
+        color: var(--text-dim);
+      }
+      nav a.active { color: var(--amber); border-color: var(--amber); }
+      nav a:not(:last-child) { border-right: none; }
+
+      /* ── Main ── */
+      main { padding: 24px 28px; display: flex; flex-direction: column; gap: 0; }
+
+      /* ── Pagination bar ── */
+      .page-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 14px; background: var(--surface);
+        border: 1px solid var(--border); border-bottom: none;
+      }
+      .page-info { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+      .page-info strong { color: var(--amber); }
+      .page-btns { display: flex; gap: 4px; }
+      .page-btn {
+        font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+        padding: 3px 9px; border-radius: 2px; border: 1px solid var(--border);
+        cursor: pointer; background: transparent; color: var(--text-dim);
+        text-transform: uppercase; transition: all .15s;
+      }
+      .page-btn:hover:not(:disabled) { color: var(--text); border-color: var(--muted); }
+      .page-btn.active { color: var(--amber); border-color: rgba(240,165,0,.4); }
+      .page-btn:disabled { opacity: .3; cursor: default; }
+
+      /* ── TX card ── */
+      .tx-card {
+        border: 1px solid var(--border);
+        border-top: none;
+      }
+      .tx-card:first-of-type { border-top: 1px solid var(--border); }
+
+      .tx-header {
+        display: grid;
+        grid-template-columns: 200px 1fr 120px 120px 100px;
+        gap: 16px;
+        align-items: center;
+        padding: 12px 16px;
+        background: #0f1218;
+        cursor: pointer;
+        user-select: none;
+        transition: background .1s;
+      }
+      .tx-header:hover { background: #12151c; }
+      .tx-header.expanded { background: #111419; border-bottom: 1px solid var(--border); }
+
+      .tx-id { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+      .tx-id strong { color: var(--text); font-size: 12px; }
+      .tx-addr { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+      .tx-amount { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--amber); }
+      .tx-time { font-family: var(--mono); font-size: 10px; color: var(--text-dim); text-align: right; }
+      .tx-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+
+      .chevron {
+        font-size: 10px; color: var(--text-dim); text-align: right;
+        transition: transform .2s;
+      }
+      .chevron.open { transform: rotate(180deg); }
+
+      /* ── Audit timeline ── */
+      .audit-body {
+        display: none;
+        padding: 0 16px 12px 16px;
+        background: var(--surface);
+      }
+      .audit-body.open { display: block; }
+
+      .timeline { display: flex; flex-direction: column; gap: 0; padding-top: 12px; }
+
+      .tl-row {
+        display: grid;
+        grid-template-columns: 130px 100px 100px 1fr 160px;
+        gap: 12px;
+        align-items: baseline;
+        padding: 7px 0;
+        border-bottom: 1px solid rgba(31,36,45,.6);
+        font-family: var(--mono);
+        font-size: 11px;
+      }
+      .tl-row:last-child { border-bottom: none; }
+
+      .tl-event {
+        display: flex; align-items: center; gap: 7px;
+      }
+      .tl-dot {
+        width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+      }
+      .tl-msg { color: var(--text-dim); font-size: 10px; }
+      .tl-hash a { color: var(--blue); font-size: 10px; text-decoration: none; }
+      .tl-hash a:hover { text-decoration: underline; }
+      .tl-ts { color: var(--text-dim); font-size: 10px; text-align: right; }
+
+      .tl-empty { padding: 12px 0; color: var(--text-dim); font-family: var(--mono); font-size: 11px; }
+
+      /* ── Badges ── */
+      .badge {
+        display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: .08em;
+        padding: 2px 7px; border-radius: 2px; text-transform: uppercase; border: 1px solid transparent;
+      }
+      .badge-PENDING      { color: var(--yellow);  border-color: rgba(232,200,74,.3);  background: rgba(232,200,74,.08); }
+      .badge-SIGNED       { color: var(--blue);    border-color: rgba(74,158,245,.3);  background: rgba(74,158,245,.08); }
+      .badge-BROADCAST    { color: var(--amber);   border-color: rgba(240,165,0,.3);   background: rgba(240,165,0,.08); }
+      .badge-SETTLED      { color: var(--green);   border-color: rgba(41,217,122,.3);  background: rgba(41,217,122,.08); }
+      .badge-FAILED       { color: var(--red);     border-color: rgba(224,82,82,.3);   background: rgba(224,82,82,.08); }
+      .badge-PENDING_REVIEW { color: var(--purple); border-color: rgba(192,132,252,.3); background: rgba(192,132,252,.08); }
+      .badge-ALLOW        { color: var(--green);   border-color: rgba(41,217,122,.3);  background: rgba(41,217,122,.08); }
+      .badge-CHALLENGE    { color: var(--yellow);  border-color: rgba(232,200,74,.3);  background: rgba(232,200,74,.08); }
+      .badge-BLOCK        { color: var(--red);     border-color: rgba(224,82,82,.3);   background: rgba(224,82,82,.08); }
+
+      /* event dot colors */
+      .dot-CREATED   { background: var(--text-dim); }
+      .dot-SIGNED    { background: var(--blue); }
+      .dot-BROADCAST { background: var(--amber); }
+      .dot-SETTLED   { background: var(--green); }
+      .dot-FAILED    { background: var(--red); }
+      .dot-APPROVED  { background: var(--green); }
+      .dot-REJECTED  { background: var(--red); }
+      .dot-default   { background: var(--muted); }
+
+      /* ── Loading / empty ── */
+      .state-msg {
+        padding: 48px; text-align: center;
+        font-family: var(--mono); font-size: 12px; color: var(--text-dim);
+        border: 1px solid var(--border); letter-spacing: .05em;
+      }
+
+      /* ── Toast ── */
+      #toast {
+        position: fixed; bottom: 24px; right: 24px;
+        background: #1e1014; border: 1px solid var(--red); color: var(--red);
+        font-family: var(--mono); font-size: 11px; padding: 10px 16px;
+        border-radius: 3px; opacity: 0; transition: opacity .3s;
+        pointer-events: none; max-width: 340px;
+      }
+      #toast.show { opacity: 1; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">SENTINEL<span>/CUSTODY</span></div>
+      <nav>
+        <a href="/dashboard">DASHBOARD</a>
+        <a href="/multidb">MULTI-DB</a>
+        <a href="/audit" class="active">AUDIT</a>
+      </nav>
+      <div class="header-right">
+        <div class="live-pill">
+          <div class="live-dot"></div>
+          LIVE · <span id="refresh-countdown">10s</span>
+        </div>
+        <div class="api-config">
+          <label>API KEY</label>
+          <input id="api-key-input" type="password" placeholder="X-API-Key" value="my-local-test-key" />
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div id="content">
+        <div class="state-msg">LOADING...</div>
+      </div>
+    </main>
+
+    <div id="toast"></div>
+
+    <script>
+      const BASE = "";
+      const PAGE_SIZE = 5;
+      const REFRESH_INTERVAL = 10000;
+
+      let allTx = [];
+      let currentPage = 1;
+      let expandedIds = new Set();
+
+      function apiKey() { return document.getElementById("api-key-input").value.trim(); }
+      function headers() { return { "X-API-Key": apiKey() }; }
+
+      async function apiFetch(path) {
+        const res = await fetch(BASE + path, { headers: headers() });
+        if (!res.ok) {
+          let detail = `${res.status} ${res.statusText}`;
+          try { const b = await res.json(); detail = b.detail ?? detail; } catch(_) {}
+          throw new Error(detail);
+        }
+        return res.json();
+      }
+
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 4000);
+      }
+
+      function badge(val) {
+        if (!val) return '<span style="color:var(--text-dim)">—</span>';
+        return `<span class="badge badge-${val}">${val}</span>`;
+      }
+
+      function fmtAmount(val) {
+        const n = parseFloat(val);
+        if (isNaN(n)) return val;
+        if (n > 0 && n < 0.000001) return "< 0.000001";
+        return n.toFixed(6).replace(/\.?0+$/, "") || "0";
+      }
+
+      function fmtTs(iso) {
+        if (!iso) return "—";
+        const d = new Date(iso);
+        return d.toLocaleString("en-US", {
+          month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit",
+          hour12: false, timeZone: "America/Los_Angeles"
+        }) + " PDT";
+      }
+
+      function shortAddr(addr) {
+        if (!addr) return "—";
+        return `<span title="${addr}">${addr.slice(0,10)}…${addr.slice(-6)}</span>`;
+      }
+
+      function dotClass(event_type) {
+        const known = ["CREATED","SIGNED","BROADCAST","SETTLED","FAILED","APPROVED","REJECTED"];
+        return known.includes(event_type) ? `dot-${event_type}` : "dot-default";
+      }
+
+      function renderTimeline(logs) {
+        if (!logs || logs.length === 0) {
+          return '<div class="tl-empty">NO AUDIT EVENTS</div>';
+        }
+        const rows = logs.map(log => {
+          const hashCell = log.tx_hash
+            ? `<a href="https://sepolia.etherscan.io/tx/${log.tx_hash}" target="_blank">${log.tx_hash.slice(0,10)}…${log.tx_hash.slice(-6)}</a>`
+            : "—";
+          return `<div class="tl-row">
+            <div class="tl-event">
+              <div class="tl-dot ${dotClass(log.event_type)}"></div>
+              <span style="color:var(--text);font-weight:500">${log.event_type}</span>
+            </div>
+            <div>${badge(log.status)}</div>
+            <div class="tl-hash">${hashCell}</div>
+            <div class="tl-msg">${log.message || "—"}</div>
+            <div class="tl-ts">${fmtTs(log.created_at)}</div>
+          </div>`;
+        }).join("");
+        return `<div class="timeline">${rows}</div>`;
+      }
+
+      function renderPage() {
+        const total = allTx.length;
+        const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const slice = allTx.slice(start, start + PAGE_SIZE);
+
+        const pageNums = [];
+        for (let i = 1; i <= totalPages; i++) {
+          pageNums.push(
+            `<button class="page-btn${i === currentPage ? " active" : ""}" onclick="goPage(${i})">${i}</button>`
+          );
+        }
+
+        const cards = slice.map(tx => {
+          const isOpen = expandedIds.has(tx.transaction_id);
+          return `
+            <div class="tx-card">
+              <div class="tx-header${isOpen ? " expanded" : ""}" onclick="toggleCard('${tx.transaction_id}')">
+                <div class="tx-id">
+                  <strong title="${tx.transaction_id}">${tx.transaction_id.slice(0,8)}…</strong><br>
+                  <span class="tx-time">${fmtTs(tx.created_at)}</span>
+                </div>
+                <div class="tx-addr">${shortAddr(tx.to_address)}</div>
+                <div class="tx-amount">${fmtAmount(tx.amount)} ETH</div>
+                <div class="tx-badges">${badge(tx.status)} ${badge(tx.policy_decision)}</div>
+                <div class="chevron${isOpen ? " open" : ""}">▼ ${tx.audit_logs.length} events</div>
+              </div>
+              <div class="audit-body${isOpen ? " open" : ""}" id="audit-${tx.transaction_id}">
+                ${renderTimeline(tx.audit_logs)}
+              </div>
+            </div>`;
+        }).join("");
+
+        const content = `
+          <div class="page-bar">
+            <div class="page-info">
+              Showing <strong>${start + 1}–${Math.min(start + PAGE_SIZE, total)}</strong>
+              of <strong>${total}</strong> transactions
+            </div>
+            <div class="page-btns">
+              <button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage <= 1 ? "disabled" : ""}>◀ PREV</button>
+              ${pageNums.join("")}
+              <button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage >= totalPages ? "disabled" : ""}>NEXT ▶</button>
+            </div>
+          </div>
+          ${cards || '<div class="state-msg">NO TRANSACTIONS</div>'}`;
+
+        document.getElementById("content").innerHTML = content;
+      }
+
+      function goPage(n) {
+        const totalPages = Math.max(1, Math.ceil(allTx.length / PAGE_SIZE));
+        if (n < 1 || n > totalPages) return;
+        currentPage = n;
+        renderPage();
+      }
+
+      function toggleCard(id) {
+        if (expandedIds.has(id)) {
+          expandedIds.delete(id);
+        } else {
+          expandedIds.add(id);
+        }
+        renderPage();
+      }
+
+      async function refresh() {
+        try {
+          allTx = await apiFetch("/withdrawals/audit-all");
+          renderPage();
+        } catch(e) {
+          document.getElementById("content").innerHTML =
+            `<div class="state-msg">ERROR: ${e.message}</div>`;
+        }
+      }
+
+      // Countdown
+      let countdown = REFRESH_INTERVAL / 1000;
+      let countdownTimer = null;
+      function startCountdown() {
+        countdown = REFRESH_INTERVAL / 1000;
+        clearInterval(countdownTimer);
+        countdownTimer = setInterval(() => {
+          countdown--;
+          document.getElementById("refresh-countdown").textContent = countdown + "s";
+          if (countdown <= 0) clearInterval(countdownTimer);
+        }, 1000);
+      }
+
+      async function tick() {
+        startCountdown();
+        await refresh();
+      }
+
+      tick();
+      setInterval(tick, REFRESH_INTERVAL);
+    </script>
+  </body>
+</html>
