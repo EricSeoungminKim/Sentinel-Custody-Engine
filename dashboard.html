@@ -545,8 +545,11 @@
 
       async function apiFetch(path, opts = {}) {
         const res = await fetch(BASE + path, { headers: headers(), ...opts });
-        if (!res.ok)
-          throw new Error(`${res.status} ${res.statusText} — ${path}`);
+        if (!res.ok) {
+          let detail = `${res.status} ${res.statusText}`;
+          try { const body = await res.json(); detail = body.detail ?? detail; } catch (_) {}
+          throw new Error(`${detail} — ${path}`);
+        }
         if (res.status === 204) return null;
         return res.json();
       }

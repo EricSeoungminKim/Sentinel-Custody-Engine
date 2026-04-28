@@ -196,7 +196,11 @@ function apiKey() { return document.getElementById('api-key').value.trim(); }
 
 async function fetchData() {
   const res = await fetch('/multi-db', { headers: { 'X-API-Key': apiKey() } });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  if (!res.ok) {
+    let detail = `${res.status} ${res.statusText}`;
+    try { const body = await res.json(); detail = body.detail ?? detail; } catch (_) {}
+    throw new Error(detail);
+  }
   return res.json();
 }
 

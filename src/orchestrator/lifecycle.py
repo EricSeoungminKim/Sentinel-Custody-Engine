@@ -111,7 +111,20 @@ class EthereumTransactionLifecycleProcessor:
             )
             await self.session.commit()
 
-            tx_hash = self.broadcaster.broadcast(signed_payload)
+            try:
+                tx_hash = self.broadcaster.broadcast(signed_payload)
+            except Exception as exc:
+                tx.status = TransactionStatus.FAILED
+                await record_transaction_event(
+                    self.session,
+                    tx.id,
+                    "FAILED",
+                    status=tx.status,
+                    message=f"Broadcast failed: {exc}",
+                )
+                await self.session.commit()
+                return None
+
             tx.tx_hash = tx_hash
             tx.status = TransactionStatus.BROADCAST
             await record_transaction_event(
