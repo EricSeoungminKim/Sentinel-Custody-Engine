@@ -7,6 +7,8 @@ from src.gatekeeper.router import router as gatekeeper_router
 
 
 async def _api_key_middleware(request: Request, call_next):
+    if request.method == "OPTIONS":
+        return await call_next(request)
     api_key = request.headers.get("X-API-Key")
     if api_key != get_settings().sentinel_api_key:
         return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
