@@ -1,493 +1,607 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sentinel Custody Engine — Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-<style>
-  :root {
-    --bg:       #0d0f12;
-    --surface:  #13161b;
-    --border:   #1f242d;
-    --muted:    #3a4150;
-    --text:     #c8d0dc;
-    --text-dim: #6b7585;
-    --amber:    #f0a500;
-    --green:    #29d97a;
-    --red:      #e05252;
-    --blue:     #4a9ef5;
-    --yellow:   #e8c84a;
-    --mono: 'IBM Plex Mono', monospace;
-    --sans: 'IBM Plex Sans', sans-serif;
-  }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sentinel Custody Engine — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0d0f12;
+        --surface: #13161b;
+        --border: #1f242d;
+        --muted: #3a4150;
+        --text: #c8d0dc;
+        --text-dim: #6b7585;
+        --amber: #f0a500;
+        --green: #29d97a;
+        --red: #e05252;
+        --blue: #4a9ef5;
+        --yellow: #e8c84a;
+        --mono: "IBM Plex Mono", monospace;
+        --sans: "IBM Plex Sans", sans-serif;
+      }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 13px;
-    line-height: 1.5;
-    min-height: 100vh;
-  }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 13px;
+        line-height: 1.5;
+        min-height: 100vh;
+      }
 
-  /* ── Header ── */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 28px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+      /* ── Header ── */
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 28px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
 
-  .logo {
-    font-family: var(--mono);
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.08em;
-    color: var(--amber);
-  }
-  .logo span { color: var(--text-dim); font-weight: 400; }
+      .logo {
+        font-family: var(--mono);
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        color: var(--amber);
+      }
+      .logo span {
+        color: var(--text-dim);
+        font-weight: 400;
+      }
 
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
 
-  .live-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--green);
-    letter-spacing: 0.06em;
-  }
-  .live-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.3; }
-  }
+      .live-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--green);
+        letter-spacing: 0.06em;
+      }
+      .live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
 
-  .api-config {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  .api-config label {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.05em;
-  }
-  .api-config input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 3px;
-    width: 180px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .api-config input:focus { border-color: var(--amber); }
+      .api-config {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .api-config label {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text-dim);
+        letter-spacing: 0.05em;
+      }
+      .api-config input {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 3px;
+        width: 180px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .api-config input:focus {
+        border-color: var(--amber);
+      }
 
-  /* ── Stats bar ── */
-  .stats-bar {
-    display: flex;
-    gap: 1px;
-    background: var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-  .stat {
-    flex: 1;
-    background: var(--surface);
-    padding: 12px 20px;
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-  }
-  .stat-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .stat-value {
-    font-family: var(--mono);
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--amber);
-    line-height: 1;
-  }
+      /* ── Stats bar ── */
+      .stats-bar {
+        display: flex;
+        gap: 1px;
+        background: var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+      .stat {
+        flex: 1;
+        background: var(--surface);
+        padding: 12px 20px;
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+      .stat-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text-dim);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .stat-value {
+        font-family: var(--mono);
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--amber);
+        line-height: 1;
+      }
 
-  /* ── Main layout ── */
-  main {
-    padding: 24px 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
+      /* ── Main layout ── */
+      main {
+        padding: 24px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
 
-  /* ── Section ── */
-  .section { display: flex; flex-direction: column; gap: 0; }
+      /* ── Section ── */
+      .section {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
 
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-bottom: none;
-  }
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-bottom: none;
+      }
 
-  .section-title {
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-  }
-  .section-title strong { color: var(--amber); margin-right: 6px; }
+      .section-title {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+      }
+      .section-title strong {
+        color: var(--amber);
+        margin-right: 6px;
+      }
 
-  .section-meta {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-dim);
-  }
+      .section-meta {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text-dim);
+      }
 
-  /* ── Table ── */
-  .table-wrap {
-    border: 1px solid var(--border);
-    overflow-x: auto;
-  }
+      /* ── Table ── */
+      .table-wrap {
+        border: 1px solid var(--border);
+        overflow-x: auto;
+      }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: var(--mono);
-    font-size: 12px;
-  }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--mono);
+        font-size: 12px;
+      }
 
-  thead tr {
-    background: #0f1218;
-  }
+      thead tr {
+        background: #0f1218;
+      }
 
-  th {
-    padding: 9px 12px;
-    text-align: left;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
+      th {
+        padding: 9px 12px;
+        text-align: left;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+      }
 
-  td {
-    padding: 9px 12px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-    white-space: nowrap;
-  }
+      td {
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+        white-space: nowrap;
+      }
 
-  tr:last-child td { border-bottom: none; }
+      tr:last-child td {
+        border-bottom: none;
+      }
 
-  tbody tr {
-    transition: background 0.1s;
-  }
-  tbody tr:hover { background: rgba(255,255,255,0.025); }
+      tbody tr {
+        transition: background 0.1s;
+      }
+      tbody tr:hover {
+        background: rgba(255, 255, 255, 0.025);
+      }
 
-  /* ── Badges ── */
-  .badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    padding: 2px 7px;
-    border-radius: 2px;
-    text-transform: uppercase;
-    border: 1px solid transparent;
-  }
-  .badge-PENDING        { color: var(--yellow);  border-color: rgba(232,200,74,.3);  background: rgba(232,200,74,.08); }
-  .badge-SIGNED         { color: var(--blue);    border-color: rgba(74,158,245,.3);  background: rgba(74,158,245,.08); }
-  .badge-BROADCAST      { color: var(--amber);   border-color: rgba(240,165,.3);     background: rgba(240,165,0,.08); }
-  .badge-SETTLED        { color: var(--green);   border-color: rgba(41,217,122,.3);  background: rgba(41,217,122,.08); }
-  .badge-FAILED         { color: var(--red);     border-color: rgba(224,82,82,.3);   background: rgba(224,82,82,.08); }
-  .badge-PENDING_REVIEW { color: #c084fc;        border-color: rgba(192,132,252,.3); background: rgba(192,132,252,.08); }
-  .badge-ALLOW          { color: var(--green);   border-color: rgba(41,217,122,.3);  background: rgba(41,217,122,.08); }
-  .badge-CHALLENGE      { color: var(--yellow);  border-color: rgba(232,200,74,.3);  background: rgba(232,200,74,.08); }
-  .badge-BLOCK          { color: var(--red);     border-color: rgba(224,82,82,.3);   background: rgba(224,82,82,.08); }
+      /* ── Badges ── */
+      .badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        padding: 2px 7px;
+        border-radius: 2px;
+        text-transform: uppercase;
+        border: 1px solid transparent;
+      }
+      .badge-PENDING {
+        color: var(--yellow);
+        border-color: rgba(232, 200, 74, 0.3);
+        background: rgba(232, 200, 74, 0.08);
+      }
+      .badge-SIGNED {
+        color: var(--blue);
+        border-color: rgba(74, 158, 245, 0.3);
+        background: rgba(74, 158, 245, 0.08);
+      }
+      .badge-BROADCAST {
+        color: var(--amber);
+        border-color: rgba(240, 165, 0.3);
+        background: rgba(240, 165, 0, 0.08);
+      }
+      .badge-SETTLED {
+        color: var(--green);
+        border-color: rgba(41, 217, 122, 0.3);
+        background: rgba(41, 217, 122, 0.08);
+      }
+      .badge-FAILED {
+        color: var(--red);
+        border-color: rgba(224, 82, 82, 0.3);
+        background: rgba(224, 82, 82, 0.08);
+      }
+      .badge-PENDING_REVIEW {
+        color: #c084fc;
+        border-color: rgba(192, 132, 252, 0.3);
+        background: rgba(192, 132, 252, 0.08);
+      }
+      .badge-ALLOW {
+        color: var(--green);
+        border-color: rgba(41, 217, 122, 0.3);
+        background: rgba(41, 217, 122, 0.08);
+      }
+      .badge-CHALLENGE {
+        color: var(--yellow);
+        border-color: rgba(232, 200, 74, 0.3);
+        background: rgba(232, 200, 74, 0.08);
+      }
+      .badge-BLOCK {
+        color: var(--red);
+        border-color: rgba(224, 82, 82, 0.3);
+        background: rgba(224, 82, 82, 0.08);
+      }
 
-  /* ── Tx hash link ── */
-  .tx-link {
-    color: var(--blue);
-    text-decoration: none;
-    font-size: 11px;
-  }
-  .tx-link:hover { text-decoration: underline; }
+      /* ── Tx hash link ── */
+      .tx-link {
+        color: var(--blue);
+        text-decoration: none;
+        font-size: 11px;
+      }
+      .tx-link:hover {
+        text-decoration: underline;
+      }
 
-  .addr { color: var(--text-dim); font-size: 11px; }
-  .amount-cell { color: var(--amber); font-weight: 500; }
+      .addr {
+        color: var(--text-dim);
+        font-size: 11px;
+      }
+      .amount-cell {
+        color: var(--amber);
+        font-weight: 500;
+      }
 
-  /* ── Empty / loading ── */
-  .empty-row td {
-    text-align: center;
-    color: var(--text-dim);
-    padding: 28px;
-    font-size: 11px;
-    letter-spacing: 0.05em;
-  }
+      /* ── Empty / loading ── */
+      .empty-row td {
+        text-align: center;
+        color: var(--text-dim);
+        padding: 28px;
+        font-size: 11px;
+        letter-spacing: 0.05em;
+      }
 
-  /* ── Action buttons inside table ── */
-  .btn {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    padding: 3px 9px;
-    border-radius: 2px;
-    border: 1px solid;
-    cursor: pointer;
-    transition: opacity 0.15s;
-    text-transform: uppercase;
-    background: transparent;
-  }
-  .btn:hover { opacity: 0.75; }
-  .btn-approve { color: var(--green); border-color: rgba(41,217,122,.4); }
-  .btn-reject  { color: var(--red);   border-color: rgba(224,82,82,.4); }
-  .btn-process { color: var(--amber); border-color: rgba(240,165,0,.4); }
+      /* ── Action buttons inside table ── */
+      .btn {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        padding: 3px 9px;
+        border-radius: 2px;
+        border: 1px solid;
+        cursor: pointer;
+        transition: opacity 0.15s;
+        text-transform: uppercase;
+        background: transparent;
+      }
+      .btn:hover {
+        opacity: 0.75;
+      }
+      .btn-approve {
+        color: var(--green);
+        border-color: rgba(41, 217, 122, 0.4);
+      }
+      .btn-reject {
+        color: var(--red);
+        border-color: rgba(224, 82, 82, 0.4);
+      }
+      .btn-process {
+        color: var(--amber);
+        border-color: rgba(240, 165, 0, 0.4);
+      }
 
-  /* ── Refresh indicator ── */
-  .refreshing { animation: flash 0.3s ease; }
-  @keyframes flash { 0%,100% { opacity:1; } 50% { opacity: 0.4; } }
+      /* ── Refresh indicator ── */
+      .refreshing {
+        animation: flash 0.3s ease;
+      }
+      @keyframes flash {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
 
-  /* ── Error toast ── */
-  #toast {
-    position: fixed;
-    bottom: 24px; right: 24px;
-    background: #1e1014;
-    border: 1px solid var(--red);
-    color: var(--red);
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 10px 16px;
-    border-radius: 3px;
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-    max-width: 340px;
-  }
-  #toast.show { opacity: 1; }
-</style>
-</head>
-<body>
+      /* ── Error toast ── */
+      #toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #1e1014;
+        border: 1px solid var(--red);
+        color: var(--red);
+        font-family: var(--mono);
+        font-size: 11px;
+        padding: 10px 16px;
+        border-radius: 3px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+        max-width: 340px;
+      }
+      #toast.show {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">SENTINEL<span>/CUSTODY</span></div>
+      <div class="header-right">
+        <div class="live-pill">
+          <div class="live-dot"></div>
+          LIVE · <span id="refresh-countdown">5s</span>
+        </div>
+        <div class="api-config">
+          <label>API KEY</label>
+          <input
+            id="api-key-input"
+            type="password"
+            placeholder="X-API-Key"
+            value="my-local-test-key"
+          />
+        </div>
+      </div>
+    </header>
 
-<header>
-  <div class="logo">SENTINEL<span>/CUSTODY</span></div>
-  <div class="header-right">
-    <div class="live-pill">
-      <div class="live-dot"></div>
-      LIVE · <span id="refresh-countdown">5s</span>
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-label">Transactions</span>
+        <span class="stat-value" id="stat-total">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Settled</span>
+        <span class="stat-value" id="stat-settled">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Pending Review</span>
+        <span class="stat-value" id="stat-review">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Failed</span>
+        <span class="stat-value" id="stat-failed">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Ledgers</span>
+        <span class="stat-value" id="stat-ledgers">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Whitelist</span>
+        <span class="stat-value" id="stat-whitelist">—</span>
+      </div>
     </div>
-    <div class="api-config">
-      <label>API KEY</label>
-      <input id="api-key-input" type="password" placeholder="X-API-Key" value="my-local-test-key" />
-    </div>
-  </div>
-</header>
 
-<div class="stats-bar">
-  <div class="stat">
-    <span class="stat-label">Transactions</span>
-    <span class="stat-value" id="stat-total">—</span>
-  </div>
-  <div class="stat">
-    <span class="stat-label">Settled</span>
-    <span class="stat-value" id="stat-settled">—</span>
-  </div>
-  <div class="stat">
-    <span class="stat-label">Pending Review</span>
-    <span class="stat-value" id="stat-review">—</span>
-  </div>
-  <div class="stat">
-    <span class="stat-label">Failed</span>
-    <span class="stat-value" id="stat-failed">—</span>
-  </div>
-  <div class="stat">
-    <span class="stat-label">Ledgers</span>
-    <span class="stat-value" id="stat-ledgers">—</span>
-  </div>
-  <div class="stat">
-    <span class="stat-label">Whitelist</span>
-    <span class="stat-value" id="stat-whitelist">—</span>
-  </div>
-</div>
+    <main>
+      <!-- Transactions -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title"><strong>01</strong> TRANSACTIONS</div>
+          <div class="section-meta" id="tx-meta">—</div>
+        </div>
+        <div class="table-wrap">
+          <table id="tx-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>To Address</th>
+                <th>Amount (ETH)</th>
+                <th>Status</th>
+                <th>Policy</th>
+                <th>Tx Hash</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tx-body">
+              <tr class="empty-row">
+                <td colspan="7">LOADING...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-<main>
+      <!-- Ledgers -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title"><strong>02</strong> LEDGERS</div>
+          <div class="section-meta" id="ledger-meta">—</div>
+        </div>
+        <div class="table-wrap">
+          <table id="ledger-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Balance</th>
+                <th>Created At</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-body">
+              <tr class="empty-row">
+                <td colspan="4">LOADING...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-  <!-- Transactions -->
-  <div class="section">
-    <div class="section-header">
-      <div class="section-title"><strong>01</strong> TRANSACTIONS</div>
-      <div class="section-meta" id="tx-meta">—</div>
-    </div>
-    <div class="table-wrap">
-      <table id="tx-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>To Address</th>
-            <th>Amount (ETH)</th>
-            <th>Status</th>
-            <th>Policy</th>
-            <th>Tx Hash</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="tx-body">
-          <tr class="empty-row"><td colspan="7">LOADING...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+      <!-- Whitelist -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title"><strong>03</strong> WHITELIST</div>
+          <div class="section-meta" id="wl-meta">—</div>
+        </div>
+        <div class="table-wrap">
+          <table id="wl-table">
+            <thead>
+              <tr>
+                <th>Address</th>
+                <th>Label</th>
+                <th>Created At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="wl-body">
+              <tr class="empty-row">
+                <td colspan="4">LOADING...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
 
-  <!-- Ledgers -->
-  <div class="section">
-    <div class="section-header">
-      <div class="section-title"><strong>02</strong> LEDGERS</div>
-      <div class="section-meta" id="ledger-meta">—</div>
-    </div>
-    <div class="table-wrap">
-      <table id="ledger-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Balance</th>
-            <th>Created At</th>
-          </tr>
-        </thead>
-        <tbody id="ledger-body">
-          <tr class="empty-row"><td colspan="4">LOADING...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <div id="toast"></div>
 
-  <!-- Whitelist -->
-  <div class="section">
-    <div class="section-header">
-      <div class="section-title"><strong>03</strong> WHITELIST</div>
-      <div class="section-meta" id="wl-meta">—</div>
-    </div>
-    <div class="table-wrap">
-      <table id="wl-table">
-        <thead>
-          <tr>
-            <th>Address</th>
-            <th>Label</th>
-            <th>Created At</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="wl-body">
-          <tr class="empty-row"><td colspan="4">LOADING...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <script>
+      const BASE = "";
+      const REFRESH_INTERVAL = 5000;
 
-</main>
+      function apiKey() {
+        return document.getElementById("api-key-input").value.trim();
+      }
 
-<div id="toast"></div>
+      function headers() {
+        return { "X-API-Key": apiKey(), "Content-Type": "application/json" };
+      }
 
-<script>
-const BASE = 'http://127.0.0.1:8000';
-const REFRESH_INTERVAL = 5000;
+      async function apiFetch(path, opts = {}) {
+        const res = await fetch(BASE + path, { headers: headers(), ...opts });
+        if (!res.ok)
+          throw new Error(`${res.status} ${res.statusText} — ${path}`);
+        if (res.status === 204) return null;
+        return res.json();
+      }
 
-function apiKey() {
-  return document.getElementById('api-key-input').value.trim();
-}
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 4000);
+      }
 
-function headers() {
-  return { 'X-API-Key': apiKey(), 'Content-Type': 'application/json' };
-}
+      function badge(val) {
+        if (!val) return '<span class="addr">—</span>';
+        return `<span class="badge badge-${val}">${val}</span>`;
+      }
 
-async function apiFetch(path, opts = {}) {
-  const res = await fetch(BASE + path, { headers: headers(), ...opts });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} — ${path}`);
-  if (res.status === 204) return null;
-  return res.json();
-}
+      function shortId(id) {
+        return `<span class="addr" title="${id}">${id.slice(0, 8)}…</span>`;
+      }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 4000);
-}
+      function shortAddr(addr) {
+        if (!addr) return '<span class="addr">—</span>';
+        return `<span class="addr" title="${addr}">${addr.slice(0, 10)}…${addr.slice(-6)}</span>`;
+      }
 
-function badge(val) {
-  if (!val) return '<span class="addr">—</span>';
-  return `<span class="badge badge-${val}">${val}</span>`;
-}
+      function txHashCell(hash) {
+        if (!hash) return '<span class="addr">—</span>';
+        const short = hash.slice(0, 10) + "…" + hash.slice(-6);
+        return `<a class="tx-link" href="https://sepolia.etherscan.io/tx/${hash}" target="_blank">${short}</a>`;
+      }
 
-function shortId(id) {
-  return `<span class="addr" title="${id}">${id.slice(0, 8)}…</span>`;
-}
+      function fmtTime(iso) {
+        if (!iso) return "—";
+        const d = new Date(iso);
+        return (
+          d.toLocaleTimeString("en-US", { hour12: false }) +
+          " " +
+          d.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })
+        );
+      }
 
-function shortAddr(addr) {
-  if (!addr) return '<span class="addr">—</span>';
-  return `<span class="addr" title="${addr}">${addr.slice(0, 10)}…${addr.slice(-6)}</span>`;
-}
+      // ── Transactions ──────────────────────────────────────────────
+      async function loadTransactions() {
+        try {
+          const data = await apiFetch("/withdrawals?limit=50");
+          const tbody = document.getElementById("tx-body");
+          document.getElementById("tx-meta").textContent =
+            `${data.length} rows`;
 
-function txHashCell(hash) {
-  if (!hash) return '<span class="addr">—</span>';
-  const short = hash.slice(0, 10) + '…' + hash.slice(-6);
-  return `<a class="tx-link" href="https://sepolia.etherscan.io/tx/${hash}" target="_blank">${short}</a>`;
-}
+          if (data.length === 0) {
+            tbody.innerHTML =
+              '<tr class="empty-row"><td colspan="7">NO TRANSACTIONS</td></tr>';
+            return;
+          }
 
-function fmtTime(iso) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  return d.toLocaleTimeString('en-US', { hour12: false }) + ' ' +
-         d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
-}
-
-// ── Transactions ──────────────────────────────────────────────
-async function loadTransactions() {
-  try {
-    const data = await apiFetch('/withdrawals?limit=50');
-    const tbody = document.getElementById('tx-body');
-    document.getElementById('tx-meta').textContent = `${data.length} rows`;
-
-    if (data.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">NO TRANSACTIONS</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = data.map(tx => {
-      const actions = buildTxActions(tx);
-      return `<tr>
+          tbody.innerHTML = data
+            .map((tx) => {
+              const actions = buildTxActions(tx);
+              return `<tr>
         <td>${shortId(tx.transaction_id)}</td>
         <td>${shortAddr(tx.to_address)}</td>
         <td class="amount-cell">${parseFloat(tx.amount).toFixed(6)}</td>
@@ -496,147 +610,191 @@ async function loadTransactions() {
         <td>${txHashCell(tx.tx_hash)}</td>
         <td style="display:flex;gap:6px;">${actions}</td>
       </tr>`;
-    }).join('');
-  } catch (e) {
-    document.getElementById('tx-body').innerHTML =
-      `<tr class="empty-row"><td colspan="7">ERROR: ${e.message}</td></tr>`;
-  }
-}
+            })
+            .join("");
+        } catch (e) {
+          document.getElementById("tx-body").innerHTML =
+            `<tr class="empty-row"><td colspan="7">ERROR: ${e.message}</td></tr>`;
+        }
+      }
 
-function buildTxActions(tx) {
-  const id = tx.transaction_id;
-  const parts = [];
-  if (tx.status === 'PENDING_REVIEW') {
-    parts.push(`<button class="btn btn-approve" onclick="approve('${id}')">APPROVE</button>`);
-    parts.push(`<button class="btn btn-reject"  onclick="reject('${id}')">REJECT</button>`);
-  }
-  if (tx.status === 'PENDING') {
-    parts.push(`<button class="btn btn-process" onclick="process('${id}')">PROCESS</button>`);
-  }
-  if (tx.status === 'BROADCAST' && tx.tx_hash) {
-    parts.push(`<button class="btn btn-process" onclick="reconcile('${id}')">RECONCILE</button>`);
-  }
-  return parts.join('') || '<span class="addr">—</span>';
-}
+      function buildTxActions(tx) {
+        const id = tx.transaction_id;
+        const parts = [];
+        if (tx.status === "PENDING_REVIEW") {
+          parts.push(
+            `<button class="btn btn-approve" onclick="approve('${id}')">APPROVE</button>`,
+          );
+          parts.push(
+            `<button class="btn btn-reject"  onclick="reject('${id}')">REJECT</button>`,
+          );
+        }
+        if (tx.status === "PENDING") {
+          parts.push(
+            `<button class="btn btn-process" onclick="process('${id}')">PROCESS</button>`,
+          );
+        }
+        if (tx.status === "BROADCAST" && tx.tx_hash) {
+          parts.push(
+            `<button class="btn btn-process" onclick="reconcile('${id}')">RECONCILE</button>`,
+          );
+        }
+        return parts.join("") || '<span class="addr">—</span>';
+      }
 
-async function approve(id) {
-  try {
-    await apiFetch(`/withdrawals/${id}/approve`, { method: 'POST' });
-    await refresh();
-  } catch (e) { showToast(e.message); }
-}
+      async function approve(id) {
+        try {
+          await apiFetch(`/withdrawals/${id}/approve`, { method: "POST" });
+          await refresh();
+        } catch (e) {
+          showToast(e.message);
+        }
+      }
 
-async function reject(id) {
-  try {
-    await apiFetch(`/withdrawals/${id}/reject`, { method: 'POST' });
-    await refresh();
-  } catch (e) { showToast(e.message); }
-}
+      async function reject(id) {
+        try {
+          await apiFetch(`/withdrawals/${id}/reject`, { method: "POST" });
+          await refresh();
+        } catch (e) {
+          showToast(e.message);
+        }
+      }
 
-async function process(id) {
-  try {
-    await apiFetch(`/withdrawals/${id}/process`, { method: 'POST' });
-    await refresh();
-  } catch (e) { showToast(e.message); }
-}
+      async function process(id) {
+        try {
+          await apiFetch(`/withdrawals/${id}/process`, { method: "POST" });
+          await refresh();
+        } catch (e) {
+          showToast(e.message);
+        }
+      }
 
-async function reconcile(id) {
-  try {
-    await apiFetch(`/transactions/${id}/reconcile`, { method: 'POST' });
-    await refresh();
-  } catch (e) { showToast(e.message); }
-}
+      async function reconcile(id) {
+        try {
+          await apiFetch(`/transactions/${id}/reconcile`, { method: "POST" });
+          await refresh();
+        } catch (e) {
+          showToast(e.message);
+        }
+      }
 
-// ── Ledgers ───────────────────────────────────────────────────
-async function loadLedgers() {
-  try {
-    const data = await apiFetch('/ledgers');
-    const tbody = document.getElementById('ledger-body');
-    document.getElementById('ledger-meta').textContent = `${data.length} rows`;
+      // ── Ledgers ───────────────────────────────────────────────────
+      async function loadLedgers() {
+        try {
+          const data = await apiFetch("/ledgers");
+          const tbody = document.getElementById("ledger-body");
+          document.getElementById("ledger-meta").textContent =
+            `${data.length} rows`;
 
-    if (data.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">NO LEDGERS</td></tr>';
-      return;
-    }
+          if (data.length === 0) {
+            tbody.innerHTML =
+              '<tr class="empty-row"><td colspan="4">NO LEDGERS</td></tr>';
+            return;
+          }
 
-    tbody.innerHTML = data.map(l => `<tr>
+          tbody.innerHTML = data
+            .map(
+              (l) => `<tr>
       <td>${shortId(l.id)}</td>
       <td style="color:var(--text)">${l.name}</td>
       <td class="amount-cell">${parseFloat(l.balance).toLocaleString()}</td>
       <td class="addr">${fmtTime(l.created_at)}</td>
-    </tr>`).join('');
-  } catch (e) {
-    document.getElementById('ledger-body').innerHTML =
-      `<tr class="empty-row"><td colspan="4">ERROR: ${e.message}</td></tr>`;
-  }
-}
+    </tr>`,
+            )
+            .join("");
+        } catch (e) {
+          document.getElementById("ledger-body").innerHTML =
+            `<tr class="empty-row"><td colspan="4">ERROR: ${e.message}</td></tr>`;
+        }
+      }
 
-// ── Whitelist ─────────────────────────────────────────────────
-async function loadWhitelist() {
-  try {
-    const data = await apiFetch('/whitelist');
-    const tbody = document.getElementById('wl-body');
-    document.getElementById('wl-meta').textContent = `${data.length} rows`;
+      // ── Whitelist ─────────────────────────────────────────────────
+      async function loadWhitelist() {
+        try {
+          const data = await apiFetch("/whitelist");
+          const tbody = document.getElementById("wl-body");
+          document.getElementById("wl-meta").textContent =
+            `${data.length} rows`;
 
-    if (data.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">NO ENTRIES</td></tr>';
-      return;
-    }
+          if (data.length === 0) {
+            tbody.innerHTML =
+              '<tr class="empty-row"><td colspan="4">NO ENTRIES</td></tr>';
+            return;
+          }
 
-    tbody.innerHTML = data.map(w => `<tr>
-      <td><span class="addr" title="${w.address}">${w.address.slice(0,12)}…${w.address.slice(-6)}</span></td>
-      <td style="color:var(--text)">${w.label || '—'}</td>
+          tbody.innerHTML = data
+            .map(
+              (w) => `<tr>
+      <td><span class="addr" title="${w.address}">${w.address.slice(0, 12)}…${w.address.slice(-6)}</span></td>
+      <td style="color:var(--text)">${w.label || "—"}</td>
       <td class="addr">${fmtTime(w.created_at)}</td>
       <td><button class="btn btn-reject" onclick="removeWhitelist('${w.address}')">REMOVE</button></td>
-    </tr>`).join('');
-  } catch (e) {
-    document.getElementById('wl-body').innerHTML =
-      `<tr class="empty-row"><td colspan="4">ERROR: ${e.message}</td></tr>`;
-  }
-}
+    </tr>`,
+            )
+            .join("");
+        } catch (e) {
+          document.getElementById("wl-body").innerHTML =
+            `<tr class="empty-row"><td colspan="4">ERROR: ${e.message}</td></tr>`;
+        }
+      }
 
-async function removeWhitelist(address) {
-  try {
-    await apiFetch(`/whitelist/${encodeURIComponent(address)}`, { method: 'DELETE' });
-    await refresh();
-  } catch (e) { showToast(e.message); }
-}
+      async function removeWhitelist(address) {
+        try {
+          await apiFetch(`/whitelist/${encodeURIComponent(address)}`, {
+            method: "DELETE",
+          });
+          await refresh();
+        } catch (e) {
+          showToast(e.message);
+        }
+      }
 
-// ── Stats ─────────────────────────────────────────────────────
-async function loadStats() {
-  try {
-    const s = await apiFetch('/stats');
-    document.getElementById('stat-total').textContent    = s.total_transactions;
-    document.getElementById('stat-settled').textContent  = s.by_status['SETTLED']        ?? 0;
-    document.getElementById('stat-review').textContent   = s.by_status['PENDING_REVIEW'] ?? 0;
-    document.getElementById('stat-failed').textContent   = s.by_status['FAILED']         ?? 0;
-    document.getElementById('stat-ledgers').textContent  = s.total_ledgers;
-    document.getElementById('stat-whitelist').textContent= s.total_whitelist_entries;
-  } catch (_) {}
-}
+      // ── Stats ─────────────────────────────────────────────────────
+      async function loadStats() {
+        try {
+          const s = await apiFetch("/stats");
+          document.getElementById("stat-total").textContent =
+            s.total_transactions;
+          document.getElementById("stat-settled").textContent =
+            s.by_status["SETTLED"] ?? 0;
+          document.getElementById("stat-review").textContent =
+            s.by_status["PENDING_REVIEW"] ?? 0;
+          document.getElementById("stat-failed").textContent =
+            s.by_status["FAILED"] ?? 0;
+          document.getElementById("stat-ledgers").textContent = s.total_ledgers;
+          document.getElementById("stat-whitelist").textContent =
+            s.total_whitelist_entries;
+        } catch (_) {}
+      }
 
-// ── Refresh loop ──────────────────────────────────────────────
-let countdown = REFRESH_INTERVAL / 1000;
-let countdownTimer = null;
+      // ── Refresh loop ──────────────────────────────────────────────
+      let countdown = REFRESH_INTERVAL / 1000;
+      let countdownTimer = null;
 
-function startCountdown() {
-  countdown = REFRESH_INTERVAL / 1000;
-  clearInterval(countdownTimer);
-  countdownTimer = setInterval(() => {
-    countdown--;
-    document.getElementById('refresh-countdown').textContent = countdown + 's';
-    if (countdown <= 0) clearInterval(countdownTimer);
-  }, 1000);
-}
+      function startCountdown() {
+        countdown = REFRESH_INTERVAL / 1000;
+        clearInterval(countdownTimer);
+        countdownTimer = setInterval(() => {
+          countdown--;
+          document.getElementById("refresh-countdown").textContent =
+            countdown + "s";
+          if (countdown <= 0) clearInterval(countdownTimer);
+        }, 1000);
+      }
 
-async function refresh() {
-  startCountdown();
-  await Promise.all([loadStats(), loadTransactions(), loadLedgers(), loadWhitelist()]);
-}
+      async function refresh() {
+        startCountdown();
+        await Promise.all([
+          loadStats(),
+          loadTransactions(),
+          loadLedgers(),
+          loadWhitelist(),
+        ]);
+      }
 
-// Kick off
-refresh();
-setInterval(refresh, REFRESH_INTERVAL);
-</script>
-</body>
+      // Kick off
+      refresh();
+      setInterval(refresh, REFRESH_INTERVAL);
+    </script>
+  </body>
 </html>
