@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
+from web3.exceptions import TransactionNotFound
 
 from src.auditor.indexer import OnChainIndexer
 
@@ -11,6 +12,15 @@ def test_get_receipt_returns_none_when_pending():
     indexer = OnChainIndexer(mock_w3)
 
     assert indexer.get_receipt("0xpending") is None
+
+
+def test_get_receipt_returns_none_on_transaction_not_found():
+    mock_w3 = MagicMock()
+    mock_w3.eth.get_transaction_receipt.side_effect = TransactionNotFound("tx not found")
+
+    indexer = OnChainIndexer(mock_w3)
+
+    assert indexer.get_receipt("0xunknown") is None
 
 
 def test_get_receipt_raises_on_rpc_error():

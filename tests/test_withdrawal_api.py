@@ -78,3 +78,10 @@ async def test_process_next_no_pending(client):
         resp = await client.post("/withdrawals/process-next")
     assert resp.status_code == 200
     assert resp.json()["message"] == "No pending transaction"
+
+
+async def test_process_next_does_not_return_422(client):
+    """process-next must not be matched as /{transaction_id} UUID path."""
+    with patch("src.gatekeeper.router.process_next_pending_transaction", new_callable=AsyncMock, return_value=None):
+        resp = await client.post("/withdrawals/process-next")
+    assert resp.status_code != 422

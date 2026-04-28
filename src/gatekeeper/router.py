@@ -56,7 +56,7 @@ async def request_withdrawal(
     whitelist = await fetch_whitelist(session)
     daily_spent = await fetch_daily_spent(session, body.ledger_id)
 
-    daily_limit = Decimal(str(get_settings().daily_withdrawal_limit))
+    daily_limit = get_settings().daily_withdrawal_limit
     engine = PolicyEngine(whitelist_addresses=whitelist, daily_limit=daily_limit)
     decision = engine.evaluate(PolicyRequest(
         to_address=body.to_address,
@@ -101,6 +101,17 @@ def _tx_response(tx: Transaction) -> TransactionStatusResponse:
         policy_decision=tx.policy_decision.value if tx.policy_decision else None,
         tx_hash=tx.tx_hash,
     )
+
+
+@router.post("/process-next", response_model=ProcessTransactionResponse)
+async def process_next_withdrawal(
+    session: AsyncSession = Depends(get_session),
+) -> ProcessTransactionResponse:
+    result = await process_next_pending_transaction(session)
+    if result is None:
+        return ProcessTransactionResponse(transaction_id=None, tx_hash=None, message="No pending transaction")
+    tx_id, tx_hash = result
+    return ProcessTransactionResponse(transaction_id=tx_id, tx_hash=tx_hash, message="Transaction broadcast")
 
 
 @router.get("/{transaction_id}", response_model=TransactionStatusResponse)
@@ -182,14 +193,3 @@ async def process_withdrawal(
     if tx_hash is None:
         raise HTTPException(status_code=409, detail="Transaction is not processable")
     return ProcessTransactionResponse(transaction_id=transaction_id, tx_hash=tx_hash, message="Transaction broadcast")
-
-
-@router.post("/process-next", response_model=ProcessTransactionResponse)
-async def process_next_withdrawal(
-    session: AsyncSession = Depends(get_session),
-) -> ProcessTransactionResponse:
-    result = await process_next_pending_transaction(session)
-    if result is None:
-        return ProcessTransactionResponse(transaction_id=None, tx_hash=None, message="No pending transaction")
-    tx_id, tx_hash = result
-    return ProcessTransactionResponse(transaction_id=tx_id, tx_hash=tx_hash, message="Transaction broadcast")

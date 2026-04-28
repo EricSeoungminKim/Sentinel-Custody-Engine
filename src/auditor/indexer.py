@@ -1,5 +1,6 @@
 # src/auditor/indexer.py
 from web3 import Web3
+from web3.exceptions import TransactionNotFound
 
 
 class OnChainIndexer:
@@ -7,11 +8,13 @@ class OnChainIndexer:
         self._w3 = w3
 
     def get_receipt(self, tx_hash: str) -> dict | None:
-        """Fetch transaction receipt. Returns None if not yet mined."""
+        """Fetch transaction receipt. Returns None if not yet mined or tx unknown."""
         try:
             receipt = self._w3.eth.get_transaction_receipt(tx_hash)
             if receipt is None:
                 return None
             return {"status": receipt["status"]}
+        except TransactionNotFound:
+            return None
         except Exception as exc:
             raise RuntimeError(f"Receipt lookup failed for {tx_hash}: {exc}") from exc

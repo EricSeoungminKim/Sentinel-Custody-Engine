@@ -1,6 +1,7 @@
 import asyncio
 from decimal import Decimal
 import os
+from pathlib import Path
 import uuid
 
 from dotenv import dotenv_values
@@ -17,7 +18,8 @@ from src.orchestrator.lifecycle import EthereumTransactionLifecycleProcessor
 from src.orchestrator.transaction_builder import EthereumTransactionBuilder
 
 SEPOLIA_CHAIN_ID = 11155111
-_DOTENV = dotenv_values(".env")
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+_DOTENV = dotenv_values(_PROJECT_ROOT / ".env")
 
 
 def _required_env(name: str) -> str:
