@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sentinel — Multi-DB Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:      #0d0f12;
+    --surface: #13161b;
+    --border:  #1f242d;
+    --text:    #c8d0dc;
+    --dim:     #6b7585;
+    --amber:   #f0a500;
+    --green:   #29d97a;
+    --red:     #e05252;
+    --blue:    #4a9ef5;
+    --yellow:  #e8c84a;
+    --purple:  #c084fc;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 13px; min-height: 100vh; }
+
+  /* ── Header ── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    background: var(--surface); position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-family: var(--mono); font-weight: 600; font-size: 14px; letter-spacing: .08em; color: var(--amber); }
+  .logo span { color: var(--dim); font-weight: 400; }
+  nav { display: flex; gap: 0; }
+  nav a {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--dim); text-decoration: none; padding: 6px 14px; border: 1px solid var(--border);
+    transition: color .15s, border-color .15s;
+  }
+  nav a:first-child { border-right: none; }
+  nav a.active { color: var(--amber); border-color: var(--amber); }
+  nav a:hover:not(.active) { color: var(--text); }
+  .hdr-right { display: flex; align-items: center; gap: 16px; }
+  .live-pill { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: var(--green); }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .api-wrap { display: flex; align-items: center; gap: 8px; }
+  .api-wrap label { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+  .api-wrap input {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    font-family: var(--mono); font-size: 11px; padding: 4px 8px; border-radius: 3px;
+    width: 160px; outline: none; transition: border-color .15s;
+  }
+  .api-wrap input:focus { border-color: var(--amber); }
+
+  /* ── DB columns ── */
+  main { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); min-height: calc(100vh - 53px); }
+  .db-col { background: var(--bg); display: flex; flex-direction: column; }
+
+  .db-header {
+    padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; position: sticky; top: 53px; z-index: 10;
+  }
+  .db-name { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+  .db-name.dev    { color: var(--blue); }
+  .db-name.test   { color: var(--yellow); }
+  .db-name.record { color: var(--green); }
+  .db-port { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+  .db-count { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+
+  /* ── Section within column ── */
+  .col-section { border-bottom: 1px solid var(--border); }
+  .col-section-title {
+    font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--dim); padding: 8px 16px;
+    background: #0f1218; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ── Transaction cards ── */
+  .tx-card {
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    transition: background .1s;
+  }
+  .tx-card:hover { background: rgba(255,255,255,.02); }
+  .tx-card:last-child { border-bottom: none; }
+
+  .tx-row1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .tx-amount { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--amber); }
+  .tx-addr { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-bottom: 4px; }
+  .tx-row2 { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
+  .tx-time { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-top: 2px; }
+  .tx-hash-line { font-family: var(--mono); font-size: 10px; margin-top: 2px; }
+  .tx-hash-link { color: var(--blue); text-decoration: none; }
+  .tx-hash-link:hover { text-decoration: underline; }
+
+  /* ── Audit log entries ── */
+  .audit-entry {
+    padding: 8px 16px; border-bottom: 1px solid var(--border);
+    display: grid; grid-template-columns: auto 1fr; gap: 0 10px;
+  }
+  .audit-entry:last-child { border-bottom: none; }
+  .audit-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .audit-body { }
+  .audit-row1 { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; }
+  .audit-event { font-family: var(--mono); font-size: 11px; font-weight: 600; }
+  .audit-status { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+  .audit-msg { font-size: 11px; color: var(--text); margin-bottom: 2px; }
+  .audit-time { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+  .audit-txid { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: .08em;
+    padding: 1px 6px; border-radius: 2px; text-transform: uppercase; border: 1px solid transparent;
+  }
+  .badge-PENDING        { color: var(--yellow); border-color: rgba(232,200,74,.3);  background: rgba(232,200,74,.08); }
+  .badge-SIGNED         { color: var(--blue);   border-color: rgba(74,158,245,.3);  background: rgba(74,158,245,.08); }
+  .badge-BROADCAST      { color: var(--amber);  border-color: rgba(240,165,0,.3);   background: rgba(240,165,0,.08); }
+  .badge-SETTLED        { color: var(--green);  border-color: rgba(41,217,122,.3);  background: rgba(41,217,122,.08); }
+  .badge-FAILED         { color: var(--red);    border-color: rgba(224,82,82,.3);   background: rgba(224,82,82,.08); }
+  .badge-PENDING_REVIEW { color: var(--purple); border-color: rgba(192,132,252,.3); background: rgba(192,132,252,.08); }
+  .badge-ALLOW          { color: var(--green);  border-color: rgba(41,217,122,.3);  background: rgba(41,217,122,.08); }
+  .badge-CHALLENGE      { color: var(--yellow); border-color: rgba(232,200,74,.3);  background: rgba(232,200,74,.08); }
+  .badge-BLOCK          { color: var(--red);    border-color: rgba(224,82,82,.3);   background: rgba(224,82,82,.08); }
+
+  /* audit dot colors */
+  .dot-SIGNED    { background: var(--blue); }
+  .dot-BROADCAST { background: var(--amber); }
+  .dot-SETTLED   { background: var(--green); }
+  .dot-FAILED    { background: var(--red); }
+  .dot-APPROVED  { background: var(--green); }
+  .dot-REJECTED  { background: var(--red); }
+  .dot-default   { background: var(--dim); }
+
+  .empty { padding: 20px 16px; font-family: var(--mono); font-size: 11px; color: var(--dim); text-align: center; }
+  .error { padding: 12px 16px; font-family: var(--mono); font-size: 11px; color: var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SENTINEL<span>/MULTI-DB</span></div>
+  <nav>
+    <a href="/dashboard">DASHBOARD</a>
+    <a href="/multidb" class="active">MULTI-DB</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live-pill">
+      <div class="live-dot"></div>
+      LIVE · <span id="cd">5s</span>
+    </div>
+    <div class="api-wrap">
+      <label>API KEY</label>
+      <input id="api-key" type="password" value="my-local-test-key" />
+    </div>
+  </div>
+</header>
+
+<main id="grid">
+  <div class="db-col" id="col-dev"></div>
+  <div class="db-col" id="col-test"></div>
+  <div class="db-col" id="col-record"></div>
+</main>
+
+<script>
+const DB_META = {
+  dev:    { label: 'DEV',    port: '5433', cls: 'dev' },
+  test:   { label: 'TEST',   port: '5434', cls: 'test' },
+  record: { label: 'RECORD', port: '5435', cls: 'record' },
+};
+
+function apiKey() { return document.getElementById('api-key').value.trim(); }
+
+async function fetchData() {
+  const res = await fetch('/multi-db', { headers: { 'X-API-Key': apiKey() } });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+function badge(val) {
+  if (!val) return '';
+  return `<span class="badge badge-${val}">${val.replace('_', ' ')}</span>`;
+}
+
+function shortAddr(a) {
+  if (!a) return '—';
+  return a.slice(0, 10) + '…' + a.slice(-6);
+}
+
+function shortHash(h) {
+  if (!h) return null;
+  return h.slice(0, 10) + '…' + h.slice(-6);
+}
+
+function renderCol(dbData) {
+  const meta = DB_META[dbData.db];
+  const colId = `col-${dbData.db}`;
+  const col = document.getElementById(colId);
+
+  if (!dbData.ok) {
+    col.innerHTML = `
+      <div class="db-header">
+        <span class="db-name ${meta.cls}">${meta.label}</span>
+        <span class="db-port">:${meta.port}</span>
+      </div>
+      <div class="error">⚠ ${dbData.error}</div>`;
+    return;
+  }
+
+  const txCount = dbData.transactions.length;
+  const auditCount = dbData.audit_logs.length;
+
+  // Transactions HTML
+  const txHtml = txCount === 0
+    ? '<div class="empty">NO TRANSACTIONS</div>'
+    : dbData.transactions.map(tx => {
+        const hashLine = tx.tx_hash
+          ? `<div class="tx-hash-line"><a class="tx-hash-link" href="https://sepolia.etherscan.io/tx/${tx.tx_hash}" target="_blank">${shortHash(tx.tx_hash)}</a></div>`
+          : '';
+        return `
+        <div class="tx-card">
+          <div class="tx-row1">
+            <span class="tx-amount">${parseFloat(tx.amount).toFixed(6)} ETH</span>
+            ${badge(tx.status)}
+          </div>
+          <div class="tx-addr" title="${tx.to_address}">→ ${shortAddr(tx.to_address)}</div>
+          <div class="tx-row2">
+            ${badge(tx.policy_decision)}
+          </div>
+          ${hashLine}
+          <div class="tx-time">${tx.created_at ?? '—'} LA</div>
+        </div>`;
+      }).join('');
+
+  // Audit logs HTML
+  const auditHtml = auditCount === 0
+    ? '<div class="empty">NO AUDIT LOGS</div>'
+    : dbData.audit_logs.map(a => {
+        const dotCls = `dot-${a.event_type}`;
+        const shortTxId = a.transaction_id ? a.transaction_id.slice(0, 8) + '…' : '';
+        return `
+        <div class="audit-entry">
+          <div class="audit-dot ${dotCls}" style="margin-top:5px"></div>
+          <div class="audit-body">
+            <div class="audit-row1">
+              <span class="audit-event">${a.event_type}</span>
+              <span class="audit-status">${a.status ?? ''}</span>
+            </div>
+            <div class="audit-msg">${a.message ?? ''}</div>
+            <div class="audit-txid">${shortTxId}</div>
+            <div class="audit-time">${a.created_at ?? '—'} LA</div>
+          </div>
+        </div>`;
+      }).join('');
+
+  col.innerHTML = `
+    <div class="db-header">
+      <span class="db-name ${meta.cls}">${meta.label}</span>
+      <span class="db-port">:${meta.port}</span>
+      <span class="db-count">${txCount} tx · ${auditCount} logs</span>
+    </div>
+    <div class="col-section">
+      <div class="col-section-title"><span>TRANSACTIONS</span><span>${txCount} rows</span></div>
+      ${txHtml}
+    </div>
+    <div class="col-section">
+      <div class="col-section-title"><span>AUDIT LOG</span><span>${auditCount} rows</span></div>
+      ${auditHtml}
+    </div>`;
+}
+
+let countdown = 5;
+let timer = null;
+
+function startCountdown() {
+  countdown = 5;
+  clearInterval(timer);
+  timer = setInterval(() => {
+    countdown--;
+    document.getElementById('cd').textContent = countdown + 's';
+    if (countdown <= 0) clearInterval(timer);
+  }, 1000);
+}
+
+async function refresh() {
+  startCountdown();
+  try {
+    const data = await fetchData();
+    data.forEach(renderCol);
+  } catch (e) {
+    ['dev','test','record'].forEach(db => {
+      document.getElementById(`col-${db}`).innerHTML =
+        `<div class="error">⚠ ${e.message}</div>`;
+    });
+  }
+}
+
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

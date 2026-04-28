@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     mpc_min_shares: int = 2
     mpc_total_shares: int = 3
     daily_withdrawal_limit: Decimal = Decimal("10000")
+    database_url_test: str = "postgresql+asyncpg://sentinel:sentinel@localhost:5434/sentinel_test"
+    database_url_record: str = "postgresql+asyncpg://sentinel:sentinel@localhost:5435/sentinel_record"
 
 
 @lru_cache
